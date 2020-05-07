@@ -1,0 +1,8 @@
+# vim: ts=2 sw=2
+
+FreeBSD:
+  root: /usr/local/geoserver
+  user: geoserver
+  group: geoserver
+  log: /var/log/geoserver
+  openjdk_pkg: openjdk8

@@ -1,0 +1,17 @@
+{% import_yaml "geoserver/defaults.yaml" as defaults %}
+{% import_yaml "geoserver/os.yaml" as osmap %}
+
+{% set geoserver = salt.grains.filter_by(
+    osmap,
+    grain='os',
+    merge=salt.pillar.get('geoserver:lookup', {}),
+    base=defaults
+) %}
+
+{% do geoserver.update(salt.grains.get('geoserver:instances') %}
+
+{% for geoserver_name, geoserver_config in geoserver.instances.items() %}
+
+{% endfor %}
+
+{% do salt.log.info(geoserver) %}
