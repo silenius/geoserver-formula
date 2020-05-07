@@ -1,33 +1,32 @@
 {% from "geoserver/map.jinja" import geoserver with context %}
 
-geoserver_openjdk_pkg:
-  pkg.installed:
-    - name: {{ geoserver.openjdk_pkg }}
-
 geoserver_home:
   file.directory:
-    - name: {{ geoserver.base_dir }}
+    - name: {{ geoserver.root }}
     - user: root
     - group: wheel
     - mode: 755
-    - require:
-      - pkg: geoserver_openjdk_pkg
 
 {% for instance, config in geoserver.instances.items() %}
 
-geoserver_archive:
+{{ instance }}_jdk_pkg:
+  pkg.installed:
+    - name: {{ config.jdk_conf.pkg }}
+
+{{ instance }}_geoserver_archive:
   archive.extracted:
-    - name: {{ geoserver.base_dir }}
-    - user: {{ geoserver.user }}
-    - group: {{ geoserver.user }}
-    - source: salt://geoserver/files/geoserver-{{ geoserver.version }}-bin.zip
-    - source_hash: md5={{ geoserver.files['geoserver-' ~ geoserver.version ~ '-bin.zip'] }}
-    - if_missing: {{ geoserver.base_dir ~ '/geoserver-' ~ geoserver.version }}
-    - archive_format: zip
+    - name: {{ config.root }}
+    - user: {{ config.user }}
+    - group: {{ config.user }}
+    - source: {{ config.source }}
+    - source_hash: {{ config.source_hash }}
     - require:
       - file: geoserver_home
+      - pkg: {{ instance }}_jdk_pkg
 
 {% endfor %}
+
+{#
 
 {% for plugin in geoserver.plugins %}
 {% set plugin_file = 'geoserver-' ~ geoserver.version ~ '-' ~ plugin ~ '-plugin.zip' %}
@@ -64,4 +63,4 @@ geoserver_fix_bin:
       - mode
     - require:
       - archive: geoserver_archive
-
+#}

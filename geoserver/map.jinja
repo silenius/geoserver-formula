@@ -4,14 +4,46 @@
 {% set geoserver = salt.grains.filter_by(
     osmap,
     grain='os',
-    merge=salt.pillar.get('geoserver:lookup', {}),
-    base=defaults
+    merge=salt.pillar.get('geoserver:lookup', {})
 ) %}
 
-{% do geoserver.update(salt.grains.get('geoserver:instances') %}
+{% do geoserver.defaults.update(
+    salt.slsutil.merge(
+        defaults['geoserver'],
+        geoserver.defaults|default({})
+    )
+) %}
 
-{% for geoserver_name, geoserver_config in geoserver.instances.items() %}
+{% do geoserver.update({
+    'instances' : salt.pillar.get('geoserver:instances')
+}) %}
+
+
+{% for instance, config in geoserver.instances.items() %}
+
+{% do config.update(
+    salt.slsutil.merge(geoserver.defaults, config|default({}))
+) %}
+
+{% do config.update(
+    salt.slsutil.merge({
+        'log': geoserver.log|path_join(instance) ~ '.log',
+        'root': geoserver.root|path_join(instance),
+        'source': 'salt://' ~ 'geoserver'|path_join(
+            'files', config.version, 
+            'geoserver-' ~ config.version ~ '-bin.zip'
+        ),
+        'source_hash': 'salt://' ~ 'geoserver'|path_join(
+            'files', config.version, 'md5sum'
+        ),
+        'jdk_conf': salt.slsutil.merge(
+            defaults['jdks'][salt.grains.get('os')][config.jdk],
+            config[config.jdk]|default({})
+        )
+    },
+    config)
+
+) %}
 
 {% endfor %}
-
 {% do salt.log.info(geoserver) %}
