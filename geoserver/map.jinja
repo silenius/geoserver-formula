@@ -28,9 +28,16 @@
 ) %}
 
 {% do config.update(
+    salt.slsutil.merge(defaults.geoservers[config.version], config|default({}))
+) %}
+
+{% do config.update(
     salt.slsutil.merge({
         'log': geoserver.log|path_join(instance) ~ '.log',
         'root': geoserver.root|path_join(instance),
+        'data_dir': geoserver.root|path_join(
+            instance, 'geoserver-' ~ config.version, 'data_dir'
+        ),
         'GEOSERVER_HOME': geoserver.root|path_join(instance, 'geoserver-' ~
             config.version),
         'GEOSERVER_DATA_DIR': geoserver.root|path_join(
@@ -44,16 +51,16 @@
             instance, 'geoserver-' ~ config.version, 'bin'
         ),
         'source': 'salt://' ~ 'geoserver'|path_join(
-            'files', config.version, 
+            'files', 'geoserver', config.version, 
             'geoserver-' ~ config.version ~ '-bin.zip'
         ),
         'source_hash': 'salt://' ~ 'geoserver'|path_join(
-            'files', config.version, 'md5sum'
+            'files', 'geoserver', config.version, 'md5sum'
         ),
         'jdk_conf': salt.slsutil.merge(
             defaults['jdks'][salt.grains.get('os')][config.jdk],
             config[config.jdk]|default({})
-        )
+        ),
     },
     config)
 
@@ -66,11 +73,12 @@
     {% do plugin.update(
         salt.slsutil.merge({
             'source': 'salt://' ~ 'geoserver'|path_join(
-                'files', config.version, 'geoserver-' ~ config.version ~ '-' ~
+                'files', 'geoserver', config.version, 
+                'geoserver-' ~ config.version ~ '-' ~
                 plugin.plugin ~ '-plugin.zip'
             ),
             'source_hash': 'salt://' ~ 'geoserver'|path_join(
-                'files', config.version, 'md5sum'
+                'files', 'geoserver', config.version, 'md5sum'
             ),
         }, plugin)        
     ) %}

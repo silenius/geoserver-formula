@@ -13,6 +13,10 @@ geoserver_home:
   pkg.installed:
     - name: {{ config.jdk_conf.pkg }}
 
+#############
+# GEOSERVER #
+#############
+
 {{ instance }}_geoserver_archive:
   archive.extracted:
     - name: {{ config.root }}
@@ -25,23 +29,9 @@ geoserver_home:
       - file: geoserver_home
       - pkg: {{ instance }}_jdk_pkg
 
-
-{% if config.plugins is defined %}
-{% for plugin in config.plugins %}
-{{ instance }}_geoserver_plugin_{{ plugin.plugin }}:
-  archive.extracted:
-    - name: {{ config.lib }}
-    - user: {{ config.user }}
-    - group: {{ config.group }}
-    - enforce_toplevel: False
-    - source: {{ plugin.source }}
-    - source_hash: {{ plugin.source_hash }}
-    - require:
-      - archive: {{ instance }}_geoserver_archive
-    - require_in:
-      - file: {{ instance }}_geoserver_fix_bin
-{% endfor %}
-{% endif %}
+###############
+# PERMISSIONS #
+###############
 
 {{ instance }}_geoserver_fix_bin:
   file.directory:
