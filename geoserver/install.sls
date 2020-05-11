@@ -17,50 +17,43 @@ geoserver_home:
   archive.extracted:
     - name: {{ config.root }}
     - user: {{ config.user }}
-    - group: {{ config.user }}
+    - group: {{ config.group }}
     - source: {{ config.source }}
     - source_hash: {{ config.source_hash }}
+    - enforce_toplevel: False
     - require:
       - file: geoserver_home
       - pkg: {{ instance }}_jdk_pkg
 
-{% endfor %}
 
-{#
-
-{% for plugin in geoserver.plugins %}
-{% set plugin_file = 'geoserver-' ~ geoserver.version ~ '-' ~ plugin ~ '-plugin.zip' %}
-geoserver_plugin_{{ plugin }}:
+{% if config.plugins is defined %}
+{% for plugin in config.plugins %}
+{{ instance }}_geoserver_plugin_{{ plugin.plugin }}:
   archive.extracted:
-    - name: {{ geoserver.base_dir ~ '/geoserver-' ~ geoserver.version ~ '/webapps/geoserver/WEB-INF/lib/' }}
-    - user: {{ geoserver.user }}
-    - group: {{ geoserver.user }}
+    - name: {{ config.lib }}
+    - user: {{ config.user }}
+    - group: {{ config.group }}
     - enforce_toplevel: False
-    - source: salt://geoserver/files/{{ plugin_file }}
-    - source_hash: md5={{ geoserver.files[plugin_file] }}
-    - archive_format: zip
-{% if plugin == 'printing' %}
-    # See http://docs.geoserver.org/stable/en/user/extensions/printing/index.html#verifying-installation
-    - if_missing: {{ geoserver.data_dir ~ '/printing/config.yaml' }}
-{% elif plugin == 'excel' %}
-    - if_missing: {{ geoserver.base_dir ~ '/geoserver-' ~ geoserver.version ~ '/webapps/geoserver/WEB-INF/lib/gs-excel-' ~ geoserver.version ~ '.jar' }}
-{% elif plugin == 'wps' %}
-    - if_missing: {{ geoserver.base_dir ~ '/geoserver-' ~ geoserver.version ~ '/webapps/geoserver/WEB-INF/lib/gs-wps-core-' ~ geoserver.version ~ '.jar' }}
-{% endif %}
+    - source: {{ plugin.source }}
+    - source_hash: {{ plugin.source_hash }}
     - require:
-      - archive: geoserver_archive
+      - archive: {{ instance }}_geoserver_archive
+    - require_in:
+      - file: {{ instance }}_geoserver_fix_bin
 {% endfor %}
+{% endif %}
 
-geoserver_fix_bin:
+{{ instance }}_geoserver_fix_bin:
   file.directory:
-    - name: {{ geoserver.base_dir ~ '/geoserver-' ~ geoserver.version ~ '/bin' }}
-    - user: {{ geoserver.user }}
-    - group: {{ geoserver.user }}
+    - name: {{ config.bin_dir }}
+    - user: {{ config.user }}
+    - group: {{ config.group }}
     - file_mode: 755
     - recurse:
       - user
       - group
       - mode
     - require:
-      - archive: geoserver_archive
-#}
+      - archive: {{ instance }}_geoserver_archive
+
+{% endfor %}

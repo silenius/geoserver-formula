@@ -7,6 +7,8 @@
     merge=salt.pillar.get('geoserver:lookup', {})
 ) %}
 
+{# Merge defaults for _all_ Geoserver instances #}
+
 {% do geoserver.defaults.update(
     salt.slsutil.merge(
         defaults['geoserver'],
@@ -29,6 +31,18 @@
     salt.slsutil.merge({
         'log': geoserver.log|path_join(instance) ~ '.log',
         'root': geoserver.root|path_join(instance),
+        'GEOSERVER_HOME': geoserver.root|path_join(instance, 'geoserver-' ~
+            config.version),
+        'GEOSERVER_DATA_DIR': geoserver.root|path_join(
+            instance, 'geoserver-' ~ config.version, 'data_dir'
+        ),
+        'lib': geoserver.root|path_join(
+            instance, 'geoserver-' ~ config.version, 'webapps', 'geoserver', 
+            'WEB-INF', 'lib'
+        ),
+        'bin_dir': geoserver.root|path_join(
+            instance, 'geoserver-' ~ config.version, 'bin'
+        ),
         'source': 'salt://' ~ 'geoserver'|path_join(
             'files', config.version, 
             'geoserver-' ~ config.version ~ '-bin.zip'
@@ -44,6 +58,24 @@
     config)
 
 ) %}
+
+{# Plugins #}
+
+{% if config.plugins is defined %}
+{% for plugin in config.plugins %}
+    {% do plugin.update(
+        salt.slsutil.merge({
+            'source': 'salt://' ~ 'geoserver'|path_join(
+                'files', config.version, 'geoserver-' ~ config.version ~ '-' ~
+                plugin.plugin ~ '-plugin.zip'
+            ),
+            'source_hash': 'salt://' ~ 'geoserver'|path_join(
+                'files', config.version, 'md5sum'
+            ),
+        }, plugin)        
+    ) %}
+{% endfor %}
+{% endif %}
 
 {% endfor %}
 {% do salt.log.info(geoserver) %}
