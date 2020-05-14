@@ -83,7 +83,34 @@
         }, plugin)        
     ) %}
 {% endfor %}
+{% else %}
+{% do config.update({'plugins': []}) %}
 {% endif %}
 
+{# jetty #}
+
+{% if config.jetty.modules is defined %}
+{% for module, module_config in config.jetty.modules.items() %}
+    {% if module_config.jar|default(True) %}
+    {% set _jar = 'jetty-' ~ module ~ '-' ~ config.jetty.version ~ '.jar' %}
+    {% do module_config.update(
+        salt.slsutil.merge({
+            'name': config.GEOSERVER_HOME | path_join('lib', _jar),
+            'source': 'salt://' ~ 'geoserver'|path_join(
+                'files', 'jetty', config.jetty.version, _jar
+            ),
+            'source_hash': 'salt://' ~ 'geoserver'|path_join(
+                'files', 'jetty', config.jetty.version, 'md5sum'
+            ),
+        }, module_config)        
+    ) %}
+    {% endif %}
 {% endfor %}
+{% else %}
+{% do config.jetty.update({'modules': []}) %}
+{% endif %}
+
+
+{% endfor %}
+
 {% do salt.log.info(geoserver) %}

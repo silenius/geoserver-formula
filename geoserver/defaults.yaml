@@ -11,6 +11,58 @@ geoservers:
   2.16.2:
     jetty:
       version: 9.4.18.v20190429
+      modules:
+        ext:
+          enabled: True
+          files:
+            recurse:
+              lib/ext:
+                source: salt://geoserver/files/jetty/9.4.18.v20190429/ext
+          jar: False
+          config: |
+            [description]
+            Adds all jar files discovered in $JETTY_HOME/lib/ext
+            and $JETTY_BASE/lib/ext to the servers classpath.
+
+            [tags]
+            classpath
+
+            [lib]
+            lib/ext/**.jar
+
+            [files]
+            lib/
+            lib/ext/
+        jndi:
+          enabled: False
+          files:
+            managed:
+              etc/jetty-jndi.xml:
+                source: salt://geoserver/files/jetty/jetty-jndi.xml.jinja
+          config: |
+            [depend]
+            server
+            ext
+
+            [lib]
+            lib/jetty-jndi-${jetty.version}.jar
+
+            [xml]
+            etc/jetty-jndi.xml
+        plus:
+          enabled: False
+          config: |
+            [depend]
+            server
+            security
+            jndi
+            webapp
+
+            [lib]
+            lib/jetty-plus-${jetty.version}.jar
+
+            [xml]
+            etc/jetty-plus.xml
 
 jdks:
   FreeBSD:
@@ -18,3 +70,4 @@ jdks:
       pkg: openjdk8
       JAVA_HOME: /usr/local/openjdk8
       JAVA_OPTS: -server -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Xmx2048m -Xms2048m -Dorg.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false
+      jdbc: postgresql-42.2.12.jar
