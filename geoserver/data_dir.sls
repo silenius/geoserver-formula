@@ -14,7 +14,7 @@ include:
     - require:
       - archive: {{ instance }}_geoserver_archive
   cmd.run:
-    - name: cp -R {{ config.data_dir.rstrip('/') }} {{ config.GEOSERVER_DATA_DIR }}
+    - name: cp -R {{ config.data_dir.rstrip('/') ~ '/' }} {{ config.GEOSERVER_DATA_DIR }}
     - require:
       - file: {{ instance }}_geoserver_data_dir
     - unless:

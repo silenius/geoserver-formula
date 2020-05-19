@@ -100,6 +100,8 @@ include:
     - user: {{ config.user }}
     - group: {{ config.group }}
     - mode: 644
+    - require_in:
+      - cmd: {{ instance }}_jetty_module_{{ module }}_ini
 
 {% else %}
 
@@ -128,8 +130,28 @@ include:
     - env:
       - JAVA_HOME: {{ config.jdk_conf.JAVA_HOME }}
       - JAVA_OPTS: {{ config.jdk_conf.JAVA_OPTS }}
+
+# --update-ini
+
+{% if module_config.ini is defined %}
+
+{% for ini_name, ini_value in module_config.ini.items() %}
+{{ instance }}_jetty_module_{{ module }}_ini_{{ ini_name }}:
+  cmd.run:
+    - name: {{ config.jdk_conf.JAVA_HOME | path_join('bin', 'java') }} -jar start.jar --update-ini {{ ini_name }}={{ ini_value }}
+    - cwd: {{ config.GEOSERVER_HOME }}
+    - runas: {{ config.user }}
+    - group: {{ config.group }}
+    - shell: /bin/csh
+    - env:
+      - JAVA_HOME: {{ config.jdk_conf.JAVA_HOME }}
+      - JAVA_OPTS: {{ config.jdk_conf.JAVA_OPTS }}
     - require:
-      - file: {{ instance }}_jetty_module_{{ module }}_config
+      - cmd: {{ instance }}_jetty_module_{{ module }}_ini
+{% endfor %}
+
+{% endif %}
+
 
 {% else %}
 {{ instance }}_jetty_module_{{ module }}_ini:
@@ -139,6 +161,7 @@ include:
     - repl: '#--module={{ module }}'
     - backup: False
 {% endif %}
+
 
 {% endfor %}
 {% endfor %}

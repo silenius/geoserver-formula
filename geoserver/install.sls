@@ -29,6 +29,16 @@ geoserver_home:
       - file: geoserver_home
       - pkg: {{ instance }}_jdk_pkg
 
+{{ instance }}_geoserver_web_xml:
+  file.line:
+    - name: {{ config.web_xml }}
+    - content: |
+        <!-- START managed_resource_ref -->
+
+        <!-- END managed_resource_ref -->
+    - mode: ensure
+    - before: ^</web-app>
+
 ###############
 # PERMISSIONS #
 ###############

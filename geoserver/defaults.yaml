@@ -6,12 +6,33 @@ geoserver:
   user: geoserver
   group: geoserver
   jdk: openjdk8
+  clustering:
+    enabled: False
+    config:
+      toggleSlave: 'true'
+      connection: enabled
+      topicName: VirtualTopic.geoserver
+      brokerURL: 
+      xbeanURL: ./broker.xml
+      durable: 'true'
+      toggleMaster: 'true'
+      embeddedBroker: disabled
+      embeddedBrokerProperties: embedded-broker.properties
+      connection.retry: 10
+      readOnly: disabled
+      group: geoserver-cluster
+      connection.maxwait: 500
 
 geoservers:
   2.16.2:
     jetty:
       version: 9.4.18.v20190429
       modules:
+        http:
+          enabled: True
+          jar: False
+          ini:
+            jetty.port: 8080
         ext:
           enabled: True
           files:
@@ -70,4 +91,3 @@ jdks:
       pkg: openjdk8
       JAVA_HOME: /usr/local/openjdk8
       JAVA_OPTS: -server -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Xmx2048m -Xms2048m -Dorg.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false
-      jdbc: postgresql-42.2.12.jar
