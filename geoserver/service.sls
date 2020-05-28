@@ -13,7 +13,7 @@ include:
     - makedirs: True
     - contents: |
         #!/bin/sh
-        exec chpst -u geoserver \
+        exec chpst -u {{ config.user }} \
         /bin/sh -c '
         export JAVA_HOME="{{ config.jdk_conf.JAVA_HOME }}"
         export GEOSERVER_DATA_DIR="{{ config.GEOSERVER_DATA_DIR }}"
