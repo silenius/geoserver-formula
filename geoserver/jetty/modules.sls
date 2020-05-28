@@ -14,6 +14,8 @@ include:
 
 {% if module_config.enabled %}
 
+# Copy .jar to lib/
+
 {{ instance }}_jetty_module_{{ module }}:
   file.managed:
     - name: {{ module_config.name }} 
@@ -26,6 +28,8 @@ include:
       - archive: {{ instance }}_geoserver_archive
 
 {% else %}
+
+# Delete .jar from lib/
 
 {{ instance }}_jetty_module_{{ module }}:
   file.absent:
@@ -41,6 +45,33 @@ include:
 {% if module_config.config is defined %}
 
 {% if module_config.enabled %}
+
+
+# Management of .mod files
+
+{{ instance }}_jetty_module_{{ module }}_config:
+  file.managed:
+    - name: {{ config.GEOSERVER_HOME | path_join('modules', module ~ '.mod') }}
+    - contents: {{ module_config.config|yaml }}
+    - user: {{ config.user }}
+    - group: {{ config.group }}
+    - mode: 644
+    - require_in:
+      - cmd: {{ instance }}_jetty_module_{{ module }}_ini
+
+{% else %}
+
+{{ instance }}_jetty_module_{{ module }}_config:
+  file.absent:
+    - name: {{ config.GEOSERVER_HOME | path_join('modules', module ~ '.mod') }}
+
+{% endif %}  # module_config.enabled
+
+{% endif %}  # module_config.config
+
+#########
+# FILES #
+#########
 
 # Managed configuration files (if any)
 
@@ -87,31 +118,9 @@ include:
 
 {% endif %}  # module_file_op
 
-{% endfor %}
+{% endfor %}  # module_config.files.items()
 
 {% endif %}  # module_config.files
-
-# Management of .mod files
-
-{{ instance }}_jetty_module_{{ module }}_config:
-  file.managed:
-    - name: {{ config.GEOSERVER_HOME | path_join('modules', module ~ '.mod') }}
-    - contents: {{ module_config.config|yaml }}
-    - user: {{ config.user }}
-    - group: {{ config.group }}
-    - mode: 644
-    - require_in:
-      - cmd: {{ instance }}_jetty_module_{{ module }}_ini
-
-{% else %}
-
-{{ instance }}_jetty_module_{{ module }}_config:
-  file.absent:
-    - name: {{ config.GEOSERVER_HOME | path_join('modules', module ~ '.mod') }}
-
-{% endif %}
-
-{% endif %}
 
 #############
 # start.ini #
@@ -120,6 +129,9 @@ include:
 # XXX: https://github.com/saltstack/salt/issues/57223
 
 {% if module_config.enabled %}
+
+# --add-to-start
+
 {{ instance }}_jetty_module_{{ module }}_ini:
   cmd.run:
     - name: {{ config.jdk_conf.JAVA_HOME | path_join('bin', 'java') }} -jar start.jar --add-to-start={{ module }}
@@ -150,18 +162,18 @@ include:
       - cmd: {{ instance }}_jetty_module_{{ module }}_ini
 {% endfor %}
 
-{% endif %}
-
+{% endif %}  # module_config.ini
 
 {% else %}
+
 {{ instance }}_jetty_module_{{ module }}_ini:
   file.replace:
     - name: {{ config.GEOSERVER_HOME | path_join('start.ini') }}
     - pattern: ^--module={{ module }}$
     - repl: '#--module={{ module }}'
     - backup: False
-{% endif %}
 
+{% endif %}  # module_config.enabled
 
 {% endfor %}
 {% endfor %}

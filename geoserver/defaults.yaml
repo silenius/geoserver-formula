@@ -2,7 +2,6 @@
 
 geoserver:
   version: 2.16.2
-  port: 8080
   user: geoserver
   group: geoserver
   jdk: openjdk8
