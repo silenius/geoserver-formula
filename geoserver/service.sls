@@ -21,6 +21,7 @@ include:
         export GEOSERVER_REQUIRE_FILE="{{ config.GEOSERVER_DATA_DIR | path_join('global.xml') }}"
         export GWC_DISKQUOTA_DISABLED=true
         export GWC_METASTORE_DISABLED=true
+        export GEOSERVER_CSRF_WHITELIST="{{ config.GEOSERVER_CSRF_WHITELIST }}"
         export JAVA_OPTS="{{ config.jdk_conf.JAVA_OPTS }}"
         cd {{ config.bin_dir }}
         ./startup.sh
