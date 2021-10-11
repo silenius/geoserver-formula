@@ -54,12 +54,12 @@
         'bin_dir': geoserver.root|path_join(
             instance, 'geoserver-' ~ config.version, 'bin'
         ),
-        'source': 'salt://' ~ 'geoserver'|path_join(
-            'files', 'geoserver', config.version, 
+        'source': geoserver.source_files|path_join(
+            'geoserver', config.version, 
             'geoserver-' ~ config.version ~ '-bin.zip'
         ),
-        'source_hash': 'salt://' ~ 'geoserver'|path_join(
-            'files', 'geoserver', config.version, 'md5sum'
+        'source_hash': geoserver.source_files|path_join(
+            'geoserver', config.version, 'md5sum'
         ),
         'jdk_conf': salt.slsutil.merge(
             defaults['jdks'][salt.grains.get('os')][config.jdk],
@@ -85,13 +85,13 @@
 {% for plugin in config.plugins %}
     {% do plugin.update(
         salt.slsutil.merge({
-            'source': 'salt://' ~ 'geoserver'|path_join(
-                'files', 'geoserver', config.version, 
+            'source': geoserver.source_files|path_join(
+                'geoserver', config.version, 
                 'geoserver-' ~ config.version ~ '-' ~
                 plugin.plugin ~ '-plugin.zip'
             ),
-            'source_hash': 'salt://' ~ 'geoserver'|path_join(
-                'files', 'geoserver', config.version, 'md5sum'
+            'source_hash': geoserver.source_files|path_join(
+                'geoserver', config.version, 'md5sum'
             ),
         }, plugin)        
     ) %}
@@ -109,11 +109,11 @@
     {% do module_config.update(
         salt.slsutil.merge({
             'name': config.GEOSERVER_HOME | path_join('lib', _jar),
-            'source': 'salt://' ~ 'geoserver'|path_join(
-                'files', 'jetty', config.jetty.version, _jar
+            'source': geoserver.source_files|path_join(
+                'jetty', config.jetty.version, _jar
             ),
-            'source_hash': 'salt://' ~ 'geoserver'|path_join(
-                'files', 'jetty', config.jetty.version, 'md5sum'
+            'source_hash': geoserver.source_files|path_join(
+                'jetty', config.jetty.version, 'md5sum'
             ),
         }, module_config)        
     ) %}

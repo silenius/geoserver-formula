@@ -5,6 +5,7 @@ geoserver:
   user: geoserver
   group: geoserver
   jdk: openjdk8
+  source_files: /data/geoserver/files
   clustering:
     enabled: False
     config:
@@ -37,7 +38,7 @@ geoservers:
           files:
             recurse:
               lib/ext:
-                source: salt://geoserver/files/jetty/9.4.18.v20190429/ext
+                source: jetty/9.4.18.v20190429/ext
           jar: False
           config: |
             [description]
@@ -58,7 +59,7 @@ geoservers:
           files:
             managed:
               etc/jetty-jndi.xml:
-                source: salt://geoserver/files/jetty/jetty-jndi.xml.jinja
+                source: jetty/jetty-jndi.xml.jinja
           config: |
             [depend]
             server
