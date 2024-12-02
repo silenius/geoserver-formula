@@ -62,7 +62,7 @@
             'geoserver', config.version, 'md5sum'
         ),
         'jdk_conf': salt.slsutil.merge(
-            defaults['jdks'][salt.grains.get('os')][config.jdk],
+            geoserver.jdks[[config.jdk],
             config[config.jdk]|default({})
         ),
     },

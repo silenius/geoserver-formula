@@ -3,3 +3,12 @@
 FreeBSD:
   root: /usr/local/geoserver
   log: /var/log/geoserver
+  jdks:
+    openjdk8:
+      pkg: openjdk8
+      JAVA_HOME: /usr/local/openjdk8
+      JAVA_OPTS: -server -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Xmx2048m -Xms2048m -Dorg.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false
+    openjdk11:
+      pkg: openjdk11
+      JAVA_HOME: /usr/local/openjdk11
+      JAVA_OPTS: -server -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Xmx2048m -Xms2048m -Dorg.apache.jasper.compiler.Parser.STRICT_QUOTE_ESCAPING=false
